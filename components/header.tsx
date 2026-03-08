@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CartDrawer } from "@/components/cart-drawer"
 import { WishlistDrawer } from "@/components/wishlist-drawer"
-// import { ClosetDrawer } from "@/components/closet-drawer"
 import { AuthDialog } from "@/components/auth-dialog"
 import { UserMenu } from "@/components/user-menu"
 import { AdvancedSearch } from "@/components/advanced-search"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuthStore } from "@/lib/auth-store"
 
 export function Header() {
@@ -19,8 +19,8 @@ export function Header() {
   const { isAuthenticated } = useAuthStore()
 
   return (
-    <header 
-className="sticky top-0 z-50 w-full border-b bg-transparent backdrop-blur-xl ">
+    <header
+      className="sticky top-0 z-50 w-full border-b bg-transparent backdrop-blur-xl ">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -53,7 +53,7 @@ className="sticky top-0 z-50 w-full border-b bg-transparent backdrop-blur-xl ">
             >
               Accessories
             </Link>
-             <Link
+            <Link
               href="/explore"
               className="text-grey hover:text-primary transition-all duration-300 hover:scale-105 font-medium"
             >
@@ -79,7 +79,8 @@ className="sticky top-0 z-50 w-full border-b bg-transparent backdrop-blur-xl ">
           </div>
 
           {/* Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
             {isAuthenticated ? <UserMenu /> : <AuthDialog />}
             <WishlistDrawer />
             {/* <ClosetDrawer /> */}

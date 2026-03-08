@@ -199,3 +199,12 @@
   transform-style: preserve-3d;
   transition: transform 0.1s ease-out;
 }
+
+/* Hide scrollbar for horizontal carousels */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

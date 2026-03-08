@@ -14,15 +14,15 @@ import { useStore } from "@/lib/store"
 import { Order } from "@/lib/store"
 
 // Default mock orders in case there are no real orders yet
-const defaultOrders = [
+const defaultOrders: Order[] = [
   {
     id: "ORD123456",
     date: new Date("2023-11-15"),
     total: 129.99,
     status: "Delivered",
     items: [
-      { name: "Classic White T-Shirt", quantity: 2, price: 29.99, id: 1, image: "/placeholder.svg" },
-      { name: "Slim Fit Jeans", quantity: 1, price: 69.99, id: 2, image: "/placeholder.svg" },
+      { name: "Classic White T-Shirt", quantity: 2, price: 29.99, id: 1, image: "/placeholder.svg", category: "Men's Tops", isOnSale: false, rating: 4.8, reviews: 124 },
+      { name: "Slim Fit Jeans", quantity: 1, price: 69.99, id: 2, image: "/placeholder.svg", category: "Men's Bottoms", isOnSale: false, rating: 4.5, reviews: 89 },
     ],
     subtotal: 129.97,
     shipping: 0,
@@ -46,30 +46,30 @@ export function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  
+
   // Get orders from store
   useEffect(() => {
     const { getAllOrders } = useStore.getState()
     const userOrders = getAllOrders()
-    
+
     // Use real orders if available, otherwise use default mock orders
     setOrders(userOrders.length > 0 ? userOrders : defaultOrders)
   }, [])
 
   const toggleOrderExpansion = (orderId: string) => {
-    setExpandedOrders(prev => 
-      prev.includes(orderId) 
+    setExpandedOrders(prev =>
+      prev.includes(orderId)
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  if (mockOrders.length === 0) {
+  if (orders.length === 0) {
     return (
       <div className="text-center py-16">
         <Package className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
@@ -85,7 +85,7 @@ export function OrdersPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">My Orders</h1>
-      
+
       <div className="relative mb-6">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
@@ -119,9 +119,9 @@ export function OrdersPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">${order.total.toFixed(2)}</p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="text-xs flex items-center gap-1"
                       onClick={() => toggleOrderExpansion(order.id)}
                     >
@@ -139,7 +139,7 @@ export function OrdersPage() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {expandedOrders.includes(order.id) && (
                   <div className="p-4">
                     <h4 className="font-medium mb-3">Order Items</h4>
@@ -158,8 +158,8 @@ export function OrdersPage() {
                             <h5 className="font-medium">{item.name}</h5>
                             <div className="flex gap-4 text-sm text-muted-foreground">
                               <p>Qty: {item.quantity}</p>
-                              {item.size && <p>Size: {item.size}</p>}
-                              {item.color && <p>Color: {item.color}</p>}
+                              {item.selectedSize && <p>Size: {item.selectedSize}</p>}
+                              {item.selectedColor && <p>Color: {item.selectedColor}</p>}
                             </div>
                           </div>
                           <div className="text-right">
@@ -171,9 +171,9 @@ export function OrdersPage() {
                         </div>
                       ))}
                     </div>
-                    
+
                     <Separator className="my-4" />
-                    
+
                     <div className="flex justify-between">
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/order/${order.id}`}>View Order Details</Link>
