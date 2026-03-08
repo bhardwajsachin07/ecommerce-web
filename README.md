@@ -44,7 +44,7 @@
 - ✨ **Animations** — Smooth transitions, parallax hero, glassmorphism effects
 
 ### Admin
-- 📊 **Admin Dashboard** — Product, order, and user management (login: `admin@example.com`, password: `password123`)
+- 📊 **Admin Dashboard** — Product, order, and user management (login: `admin@example.com`, password: `admin123`)
 
 ---
 
