@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useAuthStore } from "@/lib/auth-store"
 import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/supabase-products"
+import { getAllUsers } from "@/lib/supabase-users"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -157,6 +158,7 @@ function ProductFormDialog({
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuthStore()
   const [products, setProducts] = useState<Product[]>([])
+  const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchProducts = async () => {
@@ -166,9 +168,15 @@ export default function AdminPage() {
     setLoading(false)
   }
 
+  const fetchUsers = async () => {
+    const data = await getAllUsers()
+    setUsers(data)
+  }
+
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
       fetchProducts()
+      fetchUsers()
     }
   }, [isAuthenticated, user])
 
@@ -247,7 +255,7 @@ export default function AdminPage() {
   const stats = [
     { title: "Total Products", value: products.length.toString(), icon: Package, color: "text-blue-600" },
     { title: "On Sale", value: products.filter((p) => p.isOnSale).length.toString(), icon: ShoppingBag, color: "text-green-600" },
-    { title: "Categories", value: [...new Set(products.map((p) => p.category))].length.toString(), icon: Users, color: "text-purple-600" },
+    { title: "Registered Users", value: users.length.toString(), icon: Users, color: "text-purple-600" },
     { title: "Avg Price", value: products.length > 0 ? `$${(products.reduce((s, p) => s + p.price, 0) / products.length).toFixed(0)}` : "$0", icon: TrendingUp, color: "text-orange-600" },
   ]
 
@@ -295,96 +303,137 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Products List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Products</CardTitle>
-            <CardDescription>
-              {loading ? "Loading from Supabase..." : `${products.length} products in database`}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-12">
-                <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">No products yet. Add your first product!</p>
-                <ProductFormDialog
-                  title="Add New Product"
-                  onSubmit={handleCreate}
-                  trigger={<Button><Plus className="h-4 w-4 mr-2" />Add Product</Button>}
-                />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
-                        className="w-14 h-14 object-cover rounded-lg"
-                      />
-                      <div>
-                        <h3 className="font-semibold">{product.name}</h3>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{product.category}</span>
-                          {product.brand && <><span>·</span><span>{product.brand}</span></>}
+        {/* Tabs */}
+        <Tabs defaultValue="products" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-xs">
+            <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="products">
+            {/* Products List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>All Products</CardTitle>
+                <CardDescription>
+                  {loading ? "Loading from Supabase..." : `${products.length} products in database`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground mb-4">No products yet. Add your first product!</p>
+                    <ProductFormDialog
+                      title="Add New Product"
+                      onSubmit={handleCreate}
+                      trigger={<Button><Plus className="h-4 w-4 mr-2" />Add Product</Button>}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {products.map((product) => (
+                      <div
+                        key={product.id}
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={product.image || "/placeholder.svg"}
+                            alt={product.name}
+                            className="w-14 h-14 object-cover rounded-lg"
+                          />
+                          <div>
+                            <h3 className="font-semibold">{product.name}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <span>{product.category}</span>
+                              {product.brand && <><span>·</span><span>{product.brand}</span></>}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="font-bold">${product.price}</p>
+                            {product.originalPrice && (
+                              <p className="text-xs text-muted-foreground line-through">${product.originalPrice}</p>
+                            )}
+                          </div>
+                          {product.isOnSale && <Badge className="bg-accent text-accent-foreground">Sale</Badge>}
+                          <div className="flex gap-1">
+                            <ProductFormDialog
+                              title={`Edit: ${product.name}`}
+                              initial={{
+                                name: product.name,
+                                price: product.price.toString(),
+                                original_price: product.originalPrice?.toString() || "",
+                                image: product.image,
+                                category: product.category,
+                                is_on_sale: product.isOnSale,
+                                description: product.description || "",
+                                sizes: product.sizes?.join(", ") || "",
+                                colors: product.colors?.join(", ") || "",
+                                brand: product.brand || "",
+                              }}
+                              onSubmit={(form) => handleUpdate(product.id, form)}
+                              trigger={
+                                <Button variant="outline" size="icon" className="h-8 w-8">
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                              }
+                            />
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => handleDelete(product)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-bold">${product.price}</p>
-                        {product.originalPrice && (
-                          <p className="text-xs text-muted-foreground line-through">${product.originalPrice}</p>
-                        )}
-                      </div>
-                      {product.isOnSale && <Badge className="bg-accent text-accent-foreground">Sale</Badge>}
-                      <div className="flex gap-1">
-                        <ProductFormDialog
-                          title={`Edit: ${product.name}`}
-                          initial={{
-                            name: product.name,
-                            price: product.price.toString(),
-                            original_price: product.originalPrice?.toString() || "",
-                            image: product.image,
-                            category: product.category,
-                            is_on_sale: product.isOnSale,
-                            description: product.description || "",
-                            sizes: product.sizes?.join(", ") || "",
-                            colors: product.colors?.join(", ") || "",
-                            brand: product.brand || "",
-                          }}
-                          onSubmit={(form) => handleUpdate(product.id, form)}
-                          trigger={
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <Edit className="h-3.5 w-3.5" />
-                            </Button>
-                          }
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(product)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>Registered Users</CardTitle>
+                <CardDescription>{users.length} users in database</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {users.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No registered users yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {users.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors">
+                        <div>
+                          <p className="font-semibold">{u.name}</p>
+                          <p className="text-sm text-muted-foreground">{u.email}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge variant={u.role === "admin" ? "default" : "secondary"}>{u.role}</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(u.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
       <Footer />
     </div>

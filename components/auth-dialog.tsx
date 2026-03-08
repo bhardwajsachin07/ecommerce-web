@@ -23,29 +23,18 @@ export function AuthDialog() {
     e.preventDefault()
 
     if (!loginForm.email || !loginForm.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Please fill in all fields.", variant: "destructive" })
       return
     }
 
-    const success = await login(loginForm.email, loginForm.password)
+    const result = await login(loginForm.email, loginForm.password)
 
-    if (success) {
-      toast({
-        title: "Welcome back!",
-        description: "You have been successfully logged in.",
-      })
+    if (result.success) {
+      toast({ title: "Welcome back!", description: "You have been successfully logged in." })
       setIsOpen(false)
       setLoginForm({ email: "", password: "" })
     } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "Login failed", description: result.error || "Invalid email or password.", variant: "destructive" })
     }
   }
 
@@ -53,47 +42,28 @@ export function AuthDialog() {
     e.preventDefault()
 
     if (!signupForm.name || !signupForm.email || !signupForm.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Please fill in all fields.", variant: "destructive" })
       return
     }
 
     if (signupForm.password !== signupForm.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match.",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Passwords do not match.", variant: "destructive" })
       return
     }
 
     if (signupForm.password.length < 6) {
-      toast({
-        title: "Error",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Password must be at least 6 characters long.", variant: "destructive" })
       return
     }
 
-    const success = await signup(signupForm.name, signupForm.email, signupForm.password)
+    const result = await signup(signupForm.name, signupForm.email, signupForm.password)
 
-    if (success) {
-      toast({
-        title: "Account created!",
-        description: "Welcome to VINCERE! You have been automatically logged in.",
-      })
+    if (result.success) {
+      toast({ title: "Account created!", description: "Welcome to VINCERE! You have been automatically logged in." })
       setIsOpen(false)
       setSignupForm({ name: "", email: "", password: "", confirmPassword: "" })
     } else {
-      toast({
-        title: "Signup failed",
-        description: "Unable to create account. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "Signup failed", description: result.error || "Unable to create account.", variant: "destructive" })
     }
   }
 
@@ -125,35 +95,14 @@ export function AuthDialog() {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="login-email">Email</Label>
-                    <Input
-                      id="login-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={loginForm.email}
-                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="login-email" type="email" placeholder="Enter your email" value={loginForm.email} onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })} disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="login-password">Password</Label>
-                    <Input
-                      id="login-password"
-                      type="password"
-                      placeholder="Enter your password"
-                      value={loginForm.password}
-                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="login-password" type="password" placeholder="Enter your password" value={loginForm.password} onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} disabled={isLoading} />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign In"
-                    )}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</> : "Sign In"}
                   </Button>
                 </form>
               </CardContent>
@@ -170,57 +119,22 @@ export function AuthDialog() {
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={signupForm.name}
-                      onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-name" type="text" placeholder="Enter your full name" value={signupForm.name} onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })} disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={signupForm.email}
-                      onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-email" type="email" placeholder="Enter your email" value={signupForm.email} onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })} disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Create a password"
-                      value={signupForm.password}
-                      onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-password" type="password" placeholder="Create a password" value={signupForm.password} onChange={(e) => setSignupForm({ ...signupForm, password: e.target.value })} disabled={isLoading} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-confirm">Confirm Password</Label>
-                    <Input
-                      id="signup-confirm"
-                      type="password"
-                      placeholder="Confirm your password"
-                      value={signupForm.confirmPassword}
-                      onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })}
-                      disabled={isLoading}
-                    />
+                    <Input id="signup-confirm" type="password" placeholder="Confirm your password" value={signupForm.confirmPassword} onChange={(e) => setSignupForm({ ...signupForm, confirmPassword: e.target.value })} disabled={isLoading} />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
+                    {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating account...</> : "Create Account"}
                   </Button>
                 </form>
               </CardContent>
